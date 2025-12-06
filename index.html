@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h3>Auto Print 1-100 with Jump</h3>
+
+<input id="jump" type="number" placeholder="Enter number">
+<button onclick="jump = +document.getElementById('jump').value">GO</button>
+
+<div id="out" style="font-size:22px; font-weight:bold; margin-top:20px;"></div>
+
+<script>
+let out = document.getElementById("out");
+let printed = new Set();
+let current = 1;
+let jump = null;
+
+function print() {
+
+  // Jump if user entered number
+  if (jump && jump >= 1 && jump <= 100 && !printed.has(jump)) {
+    current = jump;
+    jump = null;
+  }
+
+  // Print number
+  out.innerHTML += current + " ";
+  printed.add(current);
+
+  // Move next number
+  current++;
+
+  // After 100 → continue remaining numbers
+  if (current > 100) {
+    for (let i = 1; i <= 100; i++) {
+      if (!printed.has(i)) {
+        current = i;
+        break;
+      }
+    }
+    if (printed.size == 100) return; // stop
+  }
+
+  setTimeout(print, 400);
+}
+
+print();
+</script>
+
+</body>
+</html>
