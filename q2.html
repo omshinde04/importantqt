@@ -55,7 +55,6 @@ button {
     .two,.four { grid-template-columns:1fr; max-width:300px; }
     h2 { font-size:22px; }
 }
-
 </style>
 </head>
 
@@ -88,9 +87,8 @@ button {
     <img><img><img><img>
 </div>
 
-
 <script>
-// ✅ Image Array (1.jpg → 27.jpg except 4.jpeg)
+// Image Array (1.jpeg → 27.jpeg except 4.jpeg)
 const images = [];
 for (let i = 1; i <= 27; i++) {
     if (i !== 4) images.push("images/" + i + ".jpeg");
@@ -99,53 +97,35 @@ for (let i = 1; i <= 27; i++) {
 let currentLayout = 1;
 let goIndex = 1;
 
-// Layout mapping
 const layouts = {
     1: document.getElementById("layout1"),
     2: document.getElementById("layout2"),
     4: document.getElementById("layout4")
 };
 
-// Set layout
 function showLayout(n, btn) {
     currentLayout = n;
     goIndex = 1;
 
-    // Hide all layouts
     Object.values(layouts).forEach(l => l.style.display = "none");
-
-    // Show active layout
     layouts[n].style.display = "grid";
 
-    // Remove highlight from all buttons
     document.querySelectorAll(".layout-btn").forEach(b => b.classList.remove("active"));
-
-    // Add active border
     btn.classList.add("active");
 
     resetAll();
 }
 
-// GO button logic
+// ✅ GO: change ALL images in current layout
 function goNext() {
     let imgs = layouts[currentLayout].querySelectorAll("img");
 
-    // If 1×1 layout, change the only image
-    if (currentLayout === 1) {
-        imgs[0].src = images[goIndex % images.length];
-        goIndex++;
-        return;
-    }
-
-    // For 1×2 and 2×2 layouts, keep first image fixed
-    for (let i = 1; i < imgs.length; i++) {
+    for (let i = 0; i < imgs.length; i++) {
         imgs[i].src = images[goIndex % images.length];
         goIndex++;
     }
 }
 
-
-// RESET
 function resetAll() {
     let imgs = layouts[currentLayout].querySelectorAll("img");
     imgs.forEach(img => img.src = images[0]);
@@ -155,7 +135,7 @@ function resetAll() {
 // Default view
 showLayout(1, document.querySelector(".layout-btn"));
 
-// Load default image
+// Initial load (all imgs = first image)
 document.querySelectorAll("img").forEach(img => img.src = images[0]);
 </script>
 
