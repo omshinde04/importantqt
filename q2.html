@@ -1,83 +1,162 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Short Multi-Card Slider</title>
-    <style>
-        .card {
-            width: 200px;
-            border: 1px solid #ccc;
-            padding: 15px;
-            margin: 15px;
-            display: inline-block;
-            text-align: center;
-            border-radius: 10px;
-        }
-        img {
-            width: 100%;
-            height: 120px;
-            object-fit: cover;
-        }
-        button { margin: 5px; padding: 8px 15px; }
-    </style>
+<title>Image Layout Switcher</title>
+
+<style>
+body {
+    font-family: "Segoe UI", Arial;
+    background: linear-gradient(135deg,#141e30,#243b55);
+    color: white;
+    padding: 30px;
+    text-align: center;
+}
+
+h2 {
+    margin-bottom: 20px;
+    font-size: 28px;
+}
+
+button {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    margin: 6px;
+}
+
+.layout-btn { background: #5c6bc0; color:white; }
+
+.control-btn { background: #26a69a; color: white; }
+
+.reset { background:#e53935; color:white; }
+
+.grid {
+    display: none;
+    gap: 14px;
+    margin-top: 25px;
+    justify-content: center;
+}
+
+.grid img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 2px solid #fff;
+}
+
+.one  { grid-template-columns:1fr; max-width:260px; margin:auto; }
+.two  { grid-template-columns:repeat(2,1fr); max-width:530px; margin:auto; }
+.four { grid-template-columns:repeat(2,1fr); max-width:530px; margin:auto; }
+
+@media(max-width:600px) {
+    .two,.four { grid-template-columns:1fr; max-width:300px; }
+    h2 { font-size:22px; }
+}
+
+</style>
 </head>
+
 <body>
 
-<h2>Multi-Card Slider — Short Version</h2>
+<h2>Image Layout System</h2>
 
-<button onclick="nextAll()">Next</button>
-<button onclick="resetAll()">Reset</button>
+<!-- Layout Buttons -->
+<button class="layout-btn" onclick="showLayout(1,this)">1 x 1</button>
+<button class="layout-btn" onclick="showLayout(2,this)">1 x 2</button>
+<button class="layout-btn" onclick="showLayout(4,this)">2 x 2</button>
 
-<div id="cards"></div>
+<br><br>
+
+<!-- Controls -->
+<button class="control-btn" onclick="goNext()">GO</button>
+<button class="reset" onclick="resetAll()">RESET</button>
+
+<!-- Layout Containers -->
+
+<div id="layout1" class="grid one">
+    <img>
+</div>
+
+<div id="layout2" class="grid two">
+    <img><img>
+</div>
+
+<div id="layout4" class="grid four">
+    <img><img><img><img>
+</div>
+
 
 <script>
-// Load A.jpeg → J.jpeg automatically
-const images = "ABCDEFGHIJ".split("").map(l => `images/${l}.jpeg`);
+// ✅ Image Array (1.jpg → 27.jpg except 4.jpeg)
+const images = [];
+for (let i = 1; i <= 27; i++) {
+    if (i !== 4) images.push("images/" + i + ".jpeg");
+}
 
-const cardsData = [
-    { title: "Card 1", show: 1 },
-    { title: "Card 2", show: 2 },
-    { title: "Card 3", show: 4 }
-];
+let currentLayout = 1;
+let goIndex = 1;
 
-let index = [0, 0, 0];
-let initial = [];
+// Layout mapping
+const layouts = {
+    1: document.getElementById("layout1"),
+    2: document.getElementById("layout2"),
+    4: document.getElementById("layout4")
+};
 
-// Create Cards
-cardsData.forEach((c, i) => {
-    const el = document.createElement("div");
-    el.className = "card";
-    el.innerHTML = `<h3>${c.title}</h3><div id="c${i}"></div>`;
-    document.getElementById("cards").appendChild(el);
+// Set layout
+function showLayout(n, btn) {
+    currentLayout = n;
+    goIndex = 1;
 
-    render(i);
-    initial[i] = document.getElementById(`c${i}`).innerHTML;
-});
+    // Hide all layouts
+    Object.values(layouts).forEach(l => l.style.display = "none");
 
-// Render card i
-function render(i) {
-    let imgs = "";
-    for (let j = 0; j < cardsData[i].show; j++) {
-        let imgIndex = (index[i] + j) % images.length;
-        imgs += `<img src="${images[imgIndex]}">`;
+    // Show active layout
+    layouts[n].style.display = "grid";
+
+    // Remove highlight from all buttons
+    document.querySelectorAll(".layout-btn").forEach(b => b.classList.remove("active"));
+
+    // Add active border
+    btn.classList.add("active");
+
+    resetAll();
+}
+
+// GO button logic
+function goNext() {
+    let imgs = layouts[currentLayout].querySelectorAll("img");
+
+    // If 1×1 layout, change the only image
+    if (currentLayout === 1) {
+        imgs[0].src = images[goIndex % images.length];
+        goIndex++;
+        return;
     }
-    document.getElementById(`c${i}`).innerHTML = imgs;
+
+    // For 1×2 and 2×2 layouts, keep first image fixed
+    for (let i = 1; i < imgs.length; i++) {
+        imgs[i].src = images[goIndex % images.length];
+        goIndex++;
+    }
 }
 
-// Next for all cards
-function nextAll() {
-    cardsData.forEach((c, i) => {
-        index[i] = (index[i] + c.show) % images.length;
-        render(i);
-    });
-}
 
-// Reset all cards
+// RESET
 function resetAll() {
-    cardsData.forEach((c, i) => {
-        document.getElementById(`c${i}`).innerHTML = initial[i];
-        index[i] = 0;
-    });
+    let imgs = layouts[currentLayout].querySelectorAll("img");
+    imgs.forEach(img => img.src = images[0]);
+    goIndex = 1;
 }
+
+// Default view
+showLayout(1, document.querySelector(".layout-btn"));
+
+// Load default image
+document.querySelectorAll("img").forEach(img => img.src = images[0]);
 </script>
 
 </body>

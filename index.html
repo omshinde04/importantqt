@@ -4,7 +4,7 @@
 
 <h3>Auto Print 1-100 with Jump</h3>
 
-<!-- ✅ Redirect Button -->
+<!-- Redirect Button -->
 <button onclick="window.location.href='q2.html'" 
         style="padding:8px 16px; margin-bottom:15px;">
     Go to Question 2
@@ -19,39 +19,48 @@
 <script>
 let out = document.getElementById("out");
 let printed = new Set();
-let current = 1;
-let jump = null;
+let nextNumber = 1;   // natural counter
+let jump = null;      // user jump value
 
-function print() {
+function printStep() {
+  // stop when all 1–100 printed
+  if (printed.size === 100) return;
 
-  // Jump if user entered number
+  let toPrint;
+
+  // 1) Jump has priority
   if (jump && jump >= 1 && jump <= 100 && !printed.has(jump)) {
-    current = jump;
+    toPrint = jump;
     jump = null;
   }
-
-  // Print number
-  out.innerHTML += current + " ";
-  printed.add(current);
-
-  // Move next number
-  current++;
-
-  // After 100 → continue remaining numbers
-  if (current > 100) {
+  // 2) Otherwise, use nextNumber if valid & not printed
+  else if (!printed.has(nextNumber) && nextNumber >= 1 && nextNumber <= 100) {
+    toPrint = nextNumber;
+  } 
+  // 3) Otherwise, find smallest unprinted number
+  else {
     for (let i = 1; i <= 100; i++) {
       if (!printed.has(i)) {
-        current = i;
+        toPrint = i;
         break;
       }
     }
-    if (printed.size == 100) return; // stop
+    // if still nothing found, we’re done
+    if (toPrint === undefined) return;
   }
 
-  setTimeout(print, 400);
+  // Print and record
+  out.innerHTML += toPrint + " ";
+  printed.add(toPrint);
+
+  // Update nextNumber for natural progression
+  nextNumber = toPrint + 1;
+
+  setTimeout(printStep, 400);
 }
 
-print();
+// start printing
+printStep();
 </script>
 
 </body>
